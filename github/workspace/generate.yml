@@ -1,0 +1,32 @@
+name: iPhone Free Audio Generator Engine
+on:
+  repository_dispatch:
+    types: [generate_song]
+
+jobs:
+  build-song:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Free Python Environment
+      uses: actions/setup-python@v5
+      with:
+        python-target: '3.10'
+
+    - name: Install AI Core Dependencies
+      run: |
+        pip install torch torchaudio audiocraft numpy scipy
+
+    - name: Run 3-Minute Generation Continuation Loop
+      run: |
+        python generator.py "${{ github.event.client_payload.prompt }}"
+
+    - name: Push Track to iPhone Web Interface
+      run: |
+        git config --global user.name "AI Audio System"
+        git config --global user.email "actions@github.com"
+        git add docs/my_generated_song.wav
+        git commit -m "New 3-minute song generated"
+        git push
